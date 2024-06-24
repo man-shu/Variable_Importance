@@ -155,9 +155,7 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
         self.rng = np.random.RandomState(self.random_state)
 
         # Switch to special binary case
-        if (self.prob_type == "classification") and (
-            len(np.unique(y)) < 3
-        ):
+        if (self.prob_type == "classification") and (len(np.unique(y)) < 3):
             self.prob_type = "binary"
         # Convert list_nominal to a dictionary if initialized
         # as an empty string
@@ -219,9 +217,7 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
                 enc = OneHotEncoder(handle_unknown="ignore")
                 enc.fit(X[[col_encode]])
                 labeled_cols = [
-                    enc.feature_names_in_[0]
-                    + "_"
-                    + str(enc.categories_[0][j])
+                    enc.feature_names_in_[0] + "_" + str(enc.categories_[0][j])
                     for j in range(len(enc.categories_[0]))
                 ]
                 hot_cols = pd.DataFrame(
@@ -287,9 +283,7 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
             self.inp_dim = np.cumsum(self.inp_dim)
             self.list_cols = [
                 list(
-                    np.arange(
-                        self.inp_dim[grp_ind], self.inp_dim[grp_ind + 1]
-                    )
+                    np.arange(self.inp_dim[grp_ind], self.inp_dim[grp_ind + 1])
                 )
                 for grp_ind in range(len(self.list_grps))
             ]
@@ -331,16 +325,12 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
                 random_state=self.random_state,
                 shuffle=True,
             )
-            for ind_fold, (train_index, test_index) in enumerate(
-                kf.split(X)
-            ):
+            for ind_fold, (train_index, test_index) in enumerate(kf.split(X)):
                 print(f"Processing: {ind_fold+1}")
                 X_fold = X.copy()
                 y_fold = y.copy()
 
-                self.X_nominal[ind_fold] = X_nominal_org.iloc[
-                    test_index, :
-                ]
+                self.X_nominal[ind_fold] = X_nominal_org.iloc[test_index, :]
 
                 X_train, X_test = (
                     X_fold[train_index, :],
@@ -355,6 +345,8 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
                 # following steps (Default estimator)
                 if self.do_hyper:
                     self.__tuning_hyper(X_train, y_train, ind_fold)
+                else:
+                    self.estimator.fit(X_train, y_train)
                 if self.type == "DNN":
                     self.estimator.fit(X_train, y_train)
                 self.list_estimators[ind_fold] = copy(self.estimator)
@@ -392,9 +384,7 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
             list_cont=self.list_cont,
             random_state=self.random_state,
         )
-        list_hyper = list(
-            itertools.product(*list(self.dict_hyper.values()))
-        )
+        list_hyper = list(itertools.product(*list(self.dict_hyper.values())))
         list_loss = []
         if self.type == "DNN":
             list_loss = self.estimator.hyper_tuning(
@@ -439,8 +429,7 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
 
             for ind_el, el in enumerate(list_hyper):
                 curr_params = dict(
-                    (k, v)
-                    for v, k in zip(el, list(self.dict_hyper.keys()))
+                    (k, v) for v, k in zip(el, list(self.dict_hyper.keys()))
                 )
                 list_hyper[ind_el] = curr_params
                 self.estimator.set_params(**curr_params)
@@ -458,9 +447,7 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
                     func = lambda x: self.estimator.predict_proba(x)
                 self.estimator.fit(X_train_scaled, y_train_curr)
 
-                list_loss.append(
-                    self.loss(y_valid_curr, func(X_valid_scaled))
-                )
+                list_loss.append(self.loss(y_valid_curr, func(X_valid_scaled)))
 
         ind_min = np.argmin(list_loss)
         best_hyper = list_hyper[ind_min]
@@ -502,14 +489,14 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
             if self.type != "DNN":
                 if not isinstance(curr_X, np.ndarray):
                     X_tmp = np.array(X_tmp)
-                X_tmp[:, self.list_cont] = self.scaler_x[
-                    ind_fold
-                ].transform(X_tmp[:, self.list_cont])
+                X_tmp[:, self.list_cont] = self.scaler_x[ind_fold].transform(
+                    X_tmp[:, self.list_cont]
+                )
                 self.X_proc[ind_fold] = [X_tmp.copy()]
 
-            self.org_pred[ind_fold] = self.list_estimators[
-                ind_fold
-            ].predict(X_tmp)
+            self.org_pred[ind_fold] = self.list_estimators[ind_fold].predict(
+                X_tmp
+            )
 
             # Convert to the (n_samples x n_outputs) format
             if len(self.org_pred[ind_fold].shape) != 2:
@@ -553,9 +540,10 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
             if self.type != "DNN":
                 if not isinstance(curr_X, np.ndarray):
                     X_tmp = np.array(X_tmp)
-                X_tmp[:, self.list_cont] = self.scaler_x[
-                    ind_fold
-                ].transform(X_tmp[:, self.list_cont])
+                if self.do_hyper:
+                    X_tmp[:, self.list_cont] = self.scaler_x[
+                        ind_fold
+                    ].transform(X_tmp[:, self.list_cont])
                 self.X_proc[ind_fold] = [X_tmp.copy()]
 
             self.org_pred[ind_fold] = self.list_estimators[
@@ -583,9 +571,7 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
             for col_encode in self.list_nominal["nominal"]:
                 enc = self.dict_enc[col_encode]
                 labeled_cols = [
-                    enc.feature_names_in_[0]
-                    + "_"
-                    + str(enc.categories_[0][j])
+                    enc.feature_names_in_[0] + "_" + str(enc.categories_[0][j])
                     for j in range(len(enc.categories_[0]))
                 ]
                 hot_cols = pd.DataFrame(
@@ -659,6 +645,9 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
         parallel = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)
         score_imp_l = []
         score_cur_l = []
+
+        results = {}
+
         # n_features x n_permutations x n_samples
         for ind_fold, estimator in enumerate(self.list_estimators):
             if self.type == "DNN":
@@ -754,6 +743,11 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
                         r2_score(y[ind_fold], self.org_pred[ind_fold]),
                     )
                 )
+
+            results[f"all_scores_fold{ind_fold+1}"] = self.pred_scores[
+                ind_fold
+            ].squeeze()
+
         if len(score_cur_l) > 0:
             return np.mean(score_cur_l, axis=0)
 
@@ -762,11 +756,9 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
         pred_mean = np.array(
             [np.mean(el.copy(), axis=1) for el in self.pred_scores]
         )
-        results = {}
+
         # Weighted average
-        results["importance"] = np.average(
-            pred_mean, axis=0, weights=weights
-        )
+        results["importance"] = np.average(pred_mean, axis=0, weights=weights)
         # Compute the standard deviation of each fold
         # over the number of observations
         pred_std = np.array(
@@ -782,12 +774,16 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
             np.average(pred_std, axis=0, weights=weights)
             / (np.sum(weights) - 1)
         )
+
         results["pval"] = norm.sf(results["importance"] / results["std"])
         results["pval"][np.isnan(results["pval"])] = 1
+
+        results["importance"] = results["importance"].squeeze()
+        results["pval"] = results["pval"].squeeze()
+        results["std"] = results["std"].squeeze()
+
         if self.prob_type == "regression":
-            results["score_MAE"] = np.mean(np.array(score_imp_l), axis=0)[
-                0
-            ]
+            results["score_MAE"] = np.mean(np.array(score_imp_l), axis=0)[0]
             results["score_R2"] = np.mean(np.array(score_imp_l), axis=0)[1]
         else:
             results["score_AUC"] = np.mean(np.array(score_imp_l), axis=0)
