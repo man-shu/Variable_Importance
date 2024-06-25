@@ -1,4 +1,8 @@
 import numpy as np
+<<<<<<< HEAD
+=======
+from sklearn.metrics import log_loss, mean_squared_error
+>>>>>>> fix_rm_pytorch
 from sklearn.preprocessing import StandardScaler
 
 
@@ -107,3 +111,36 @@ def convert_predict_proba(list_probs):
     if len(list_probs.shape) == 3:
         list_probs = np.array(list_probs)[..., 1].T
     return list_probs
+
+
+def ordinal_encode(y):
+    """This function encodes the ordinal variable with a special gradual encoding storing also
+    the natural order information.
+    """
+    list_y = []
+    for y_col in range(y.shape[-1]):
+        # Retrieve the unique values
+        unique_vals = np.unique(y[:, y_col])
+        # Mapping each unique value to its corresponding index
+        mapping_dict = {}
+        for i, val in enumerate(unique_vals):
+            mapping_dict[val] = i + 1
+        # create a zero-filled array for the ordinal encoding
+        y_ordinal = np.zeros((len(y[:, y_col]), len(set(y[:, y_col]))))
+        # set the appropriate indices to 1 for each ordinal value and all lower ordinal values
+        for ind_el, el in enumerate(y[:, y_col]):
+            y_ordinal[ind_el, np.arange(mapping_dict[el])] = 1
+        list_y.append(y_ordinal[:, 1:])
+
+    return list_y
+
+
+def sample_predictions(predictions, random_state=None):
+    """This function samples from the same leaf node of the input sample
+    in both the regression and the classification case
+    """
+    rng = np.random.RandomState(random_state)
+    # print(predictions[..., rng.randint(predictions.shape[2]), :])
+    # print(predictions.shape)
+    # exit(0)
+    return predictions[..., rng.randint(predictions.shape[2]), :]

@@ -289,8 +289,8 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
 
         # Initialize the first estimator (block learner)
         if self.estimator is None:
-            # removed dependence on DNN_learner
-            # and hence pytorch
+            # removed dependence on DNN_learner and hence pytorch
+            print("Please provide an estimator")
             pass
             # self.estimator = DNN_learner(
             #     prob_type=self.prob_type,
