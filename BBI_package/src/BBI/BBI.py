@@ -24,7 +24,6 @@ from .compute_importance import (
     joblib_compute_conditional,
     joblib_compute_permutation,
 )
-from .Dnn_learner import DNN_learner
 from .utils import convert_predict_proba, create_X_y
 
 
@@ -290,26 +289,29 @@ class BlockBasedImportance(BaseEstimator, TransformerMixin):
 
         # Initialize the first estimator (block learner)
         if self.estimator is None:
-            self.estimator = DNN_learner(
-                prob_type=self.prob_type,
-                encode=True,
-                do_hyper=False,
-                list_cont=self.list_cont,
-                list_grps=self.list_grps,
-                group_stacking=self.group_stacking,
-                n_jobs=self.n_jobs,
-                inp_dim=self.inp_dim,
-                random_state=self.random_state,
-                verbose=self.verbose,
-            )
-            self.type = "DNN"
-            # Initializing the dictionary for tuning the hyperparameters
-            if self.dict_hyper is None:
-                self.dict_hyper = {
-                    "lr": [1e-4, 1e-3, 1e-2],
-                    "l1_weight": [0, 1e-4, 1e-2],
-                    "l2_weight": [0, 1e-4, 1e-2],
-                }
+            # removed dependence on DNN_learner
+            # and hence pytorch
+            pass
+            # self.estimator = DNN_learner(
+            #     prob_type=self.prob_type,
+            #     encode=True,
+            #     do_hyper=False,
+            #     list_cont=self.list_cont,
+            #     list_grps=self.list_grps,
+            #     group_stacking=self.group_stacking,
+            #     n_jobs=self.n_jobs,
+            #     inp_dim=self.inp_dim,
+            #     random_state=self.random_state,
+            #     verbose=self.verbose,
+            # )
+            # self.type = "DNN"
+            # # Initializing the dictionary for tuning the hyperparameters
+            # if self.dict_hyper is None:
+            #     self.dict_hyper = {
+            #         "lr": [1e-4, 1e-3, 1e-2],
+            #         "l1_weight": [0, 1e-4, 1e-2],
+            #         "l2_weight": [0, 1e-4, 1e-2],
+            #     }
 
         elif self.estimator == "RF":
             if self.prob_type == "regression":
