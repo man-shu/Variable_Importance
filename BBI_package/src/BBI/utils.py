@@ -1,8 +1,5 @@
 import numpy as np
-<<<<<<< HEAD
-=======
 from sklearn.metrics import log_loss, mean_squared_error
->>>>>>> fix_rm_pytorch
 from sklearn.preprocessing import StandardScaler
 
 
